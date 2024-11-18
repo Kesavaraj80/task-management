@@ -1,6 +1,6 @@
 "use client";
 
-import { userSignUpSchema } from "@/schema/signupform.schema";
+import { userSignUpSchema } from "@/schema/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
 const SignUp = () => {
   const router = useRouter();
@@ -184,4 +184,10 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default function page() {
+  return (
+    <Suspense fallback={<div>Loading</div>}>
+      <SignUp />
+    </Suspense>
+  );
+}

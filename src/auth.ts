@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { compare } from "bcryptjs";
 import NextAuth, { User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -23,13 +22,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: credentials.email as string },
         });
 
-        if (!existingUser || !existingUser.password) {
+        if (!existingUser) {
           return null;
         }
-        const isPasswordValid = await compare(
-          credentials.password as string,
-          existingUser.password
-        );
+        const isPasswordValid = existingUser.password === credentials.password;
 
         if (!isPasswordValid) {
           return null;
@@ -77,8 +73,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return true;
     },
+
+    jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.id = user.id as string;
+      }
+      if (trigger === "update" && session) {
+        token = { ...token, ...session };
+      }
+      return token;
+    },
+    session({ session, token }) {
+      session.user.id = token.id;
+      return session;
+    },
   },
+
   pages: {
     signIn: "/login",
+    error: "/login",
   },
 });

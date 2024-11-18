@@ -1,14 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Button } from "@/components/ui/button";
+import LoadingButton from "@/components/LoadingButton";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { userLoginSchema } from "@/schema/loginForm.schema";
+import { userLoginSchema } from "@/schema/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { z } from "zod";
 import {
   Form,
@@ -22,7 +22,6 @@ import { handleCredentialsSignIn } from "../actions/authActions";
 
 const Login = () => {
   const router = useRouter();
-  const { toast } = useToast();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -33,10 +32,7 @@ const Login = () => {
       console.log(result);
     } catch (error) {
       console.error("Error during Google sign-in:", error);
-      toast({
-        variant: "destructive",
-        description: "An error occurred while signing in. Please try again.",
-      });
+      toast.error("An error occurred while signing in. Please try again.");
     }
   };
   const onSubmit = async (values: z.infer<typeof userLoginSchema>) => {
@@ -46,10 +42,9 @@ const Login = () => {
         password: values.password,
       });
       if (result?.message) {
-        toast({
-          variant: "destructive",
-          description: result.message,
-        });
+        toast.error(result.message);
+      } else {
+        toast.success("Login Success");
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {}
@@ -113,14 +108,7 @@ const Login = () => {
             </div>
 
             <div>
-              <Button
-                className="w-96 text-xl h-12 "
-                variant="default"
-                type="submit"
-                //   disabled={!userSignUpForm.formState.isValid}
-              >
-                Login
-              </Button>
+              <LoadingButton pending={userLoginForm.formState.isSubmitting} />
             </div>
           </form>
         </Form>
