@@ -38,11 +38,13 @@ import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
 import axios from "axios";
 import { toast } from "react-toastify";
+import LoadingButton from "../LoadingButton";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   task: TaskI | null;
+  fetchTasks: () => void;
 }
 
 const Title = ({
@@ -65,9 +67,11 @@ const Title = ({
 const Body = ({
   setIsOpen,
   task,
+  fetchTasks,
 }: {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   task: TaskI | null;
+  fetchTasks: () => void;
 }) => {
   const taskCreationForm = useForm<z.infer<typeof createTaskSchema>>({
     resolver: zodResolver(createTaskSchema),
@@ -104,6 +108,7 @@ const Body = ({
           const data = res.data as { message: string };
           toast.success(data.message);
           setIsOpen(false);
+          fetchTasks();
         })
         .catch((err) => console.log(err));
     } else {
@@ -119,6 +124,7 @@ const Body = ({
           const data = res.data as { message: string };
           toast.success(data.message);
           setIsOpen(false);
+          fetchTasks();
         })
         .catch((err) => console.log(err));
     }
@@ -253,7 +259,11 @@ const Body = ({
             )}
           />
           <div className="h-full w-full flex justify-end">
-            <Button type="submit">{task ? "Update" : "Submit"}</Button>
+            <LoadingButton
+              pending={taskCreationForm.formState.isSubmitting}
+              className="w-40 text-lg h-10"
+              text={task ? "Update" : "Submit"}
+            />
           </div>
         </form>
       </Form>
@@ -261,14 +271,19 @@ const Body = ({
   );
 };
 
-const CreateAndUpdateTaskModal = ({ isOpen, setIsOpen, task }: Props) => {
+const CreateAndUpdateTaskModal = ({
+  isOpen,
+  setIsOpen,
+  task,
+  fetchTasks,
+}: Props) => {
   return (
     <Modal
       isOpen={isOpen}
       baseClassName="h-auto w-[90%] md:h-[70%] md:w-[35%] "
       setIsOpen={setIsOpen}
       title={<Title setOpen={setIsOpen} task={task} />}
-      body={<Body setIsOpen={setIsOpen} task={task} />}
+      body={<Body setIsOpen={setIsOpen} task={task} fetchTasks={fetchTasks} />}
     />
   );
 };

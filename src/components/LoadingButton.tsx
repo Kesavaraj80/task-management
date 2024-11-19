@@ -1,8 +1,17 @@
 import { Button } from "@/components/ui/button";
+import { HTMLAttributes, ReactNode } from "react";
 
-export default function LoadingButton({ pending }: { pending: boolean }) {
+export default function LoadingButton({
+  pending,
+  className,
+  text,
+}: {
+  pending: boolean;
+  className: string | undefined;
+  text: ReactNode;
+}) {
   return (
-    <Button className="w-96 text-xl h-12" type="submit" disabled={pending}>
+    <Button className={className} type="submit" disabled={pending}>
       {pending ? (
         <div className="flex items-center justify-center">
           <svg
@@ -27,7 +36,7 @@ export default function LoadingButton({ pending }: { pending: boolean }) {
           </svg>
         </div>
       ) : (
-        "Login"
+        <span>{text}</span>
       )}
     </Button>
   );

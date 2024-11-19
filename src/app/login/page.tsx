@@ -108,7 +108,11 @@ const Login = () => {
             </div>
 
             <div>
-              <LoadingButton pending={userLoginForm.formState.isSubmitting} />
+              <LoadingButton
+                pending={userLoginForm.formState.isSubmitting}
+                className="w-96 text-xl h-12"
+                text="Login"
+              />
             </div>
           </form>
         </Form>

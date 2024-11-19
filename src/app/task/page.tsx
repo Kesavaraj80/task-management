@@ -27,6 +27,7 @@ import { CalendarIcon } from "lucide-react";
 import { ZodUndefinedDef } from "zod";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
+import Loader from "@/components/ui/Loader";
 
 const page = () => {
   const [open, setOpen] = useState(false);
@@ -43,24 +44,12 @@ const page = () => {
     dueDate: undefined,
   });
 
+  const [loading, setLoading] = useState(false);
+
   const [sort, setSort] = useState("dueDate_desc");
 
-  const handleEditTask = (task: TaskI) => {
-    setOpen(true);
-    setEditTask(task);
-  };
-
-  const handleDeleteTask = (id: string) => {
-    axios
-      .delete(`/api/task?id=${id}`)
-      .then((res) => {
-        const data = res.data as { message: string };
-        toast.success(data.message);
-      })
-      .catch((err) => console.log(err));
-  };
-
-  useEffect(() => {
+  const fetchTasks = () => {
+    setLoading(true);
     const query = new URLSearchParams();
     query.append("sort", sort);
 
@@ -76,8 +65,29 @@ const page = () => {
         };
 
         setTasks(data.tasks);
+        setLoading(false);
       })
       .catch((err) => console.log(err));
+  };
+
+  const handleEditTask = (task: TaskI) => {
+    setOpen(true);
+    setEditTask(task);
+  };
+
+  const handleDeleteTask = (id: string) => {
+    axios
+      .delete(`/api/task?id=${id}`)
+      .then((res) => {
+        const data = res.data as { message: string };
+        toast.success(data.message);
+        fetchTasks();
+      })
+      .catch((err) => console.log(err));
+  };
+
+  useEffect(() => {
+    fetchTasks();
   }, [sort, filter]);
 
   return (
@@ -235,9 +245,14 @@ const page = () => {
         </div>
       </div>
       <div className="h-[90%] w-full">
-        {tasks && tasks.length > 0 ? (
+        {loading && !tasks && (
+          <div className="h-full w-full flex justify-center items-center">
+            <Loader loaderClassName="h-40 w-40" />
+          </div>
+        )}
+        {!loading && tasks && tasks.length > 0 && (
           <div className="h-full w-full grid grid-cols-5  px-2 py-4">
-            {tasks.map((item, index) => (
+            {tasks.map((item) => (
               <TaskCard
                 key={item.id}
                 task={item}
@@ -246,7 +261,8 @@ const page = () => {
               />
             ))}
           </div>
-        ) : (
+        )}
+        {loading && tasks && tasks.length === 0 && (
           <div className="h-full w-full flex justify-center items-center">
             <span>No Tasks Found</span>
           </div>
@@ -257,6 +273,7 @@ const page = () => {
           isOpen={open}
           setIsOpen={setOpen}
           task={editTask}
+          fetchTasks={fetchTasks}
         />
       )}
     </div>
